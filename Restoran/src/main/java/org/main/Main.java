@@ -2,6 +2,8 @@ package org.main;
 
 import javax.swing.JFrame;
 
+import org.ui.GamePanel;
+
 public class Main {
     
     public static void main(String[] args) {

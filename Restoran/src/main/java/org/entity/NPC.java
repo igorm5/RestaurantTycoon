@@ -1,34 +1,40 @@
 package org.entity;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 
 import org.ui.GamePanel;
-import org.ui.KeyHandler;
+import org.ui.RestaurantScene;
 
-public class Player extends Entity {
-
+public class NPC extends Entity {
     GamePanel gp;
-    KeyHandler keyH;
+    private int targetX = 768/2;
+    private int targetY = 576/2;
+    private boolean isAktif;
+    private String pesanan = "kopi";
+    boolean sudahKeResepsionis = false;
+    boolean sedangMenunggu = false;
+    private int wait = 0;
 
-    public Player(GamePanel gp, KeyHandler keyH) {
+    public NPC(GamePanel gp) {
         this.gp = gp;
-        this.keyH = keyH;
+        this.isAktif = true;
 
         setDefaultValues();
-        getPlayerImage();
+        getNPCImage();
     }
 
     public void setDefaultValues() {
-        x = 100;
-        y = 100;
-        speed = 2;
+        x = 0;
+        y = 200;
+        speed = 1;
         direction = "down";
     }
 
-    public void getPlayerImage() {
+    public void getNPCImage() {
         try {
             up1 = ImageIO.read(getClass().getResourceAsStream("/player/up1.png"));
             up2 = ImageIO.read(getClass().getResourceAsStream("/player/up2.png"));
@@ -43,27 +49,44 @@ public class Player extends Entity {
         }
     }
 
-    public void update() {
+    public void update(RestaurantScene restaurantScene) {
 
-        if(keyH.upPressed || keyH.downPressed || keyH.leftPressed || keyH.rightPressed) {
-            if (keyH.upPressed) {
-                direction = "up";
-                y -= speed;
-            }
-            if (keyH.downPressed) {
-                direction = "down";
-                y += speed;
-            }
-            if (keyH.leftPressed) {
-                direction = "left";
-                x -= speed;
-            }
-            if (keyH.rightPressed) {
-                direction = "right";
-                x += speed;
+        if(!sudahKeResepsionis) {
+            setTarget(restaurantScene.resepsionisX, restaurantScene.resepsionisY);
+
+            if (x == targetX && y == targetY) {
+                sedangMenunggu = true; 
             }
 
-            spriteCounter++;
+            if(sedangMenunggu){
+                wait++;
+                if(wait > 180) { // Menunggu selama 3/*  */ detik (180 frames)
+                    sudahKeResepsionis = true;
+                    sedangMenunggu = false;
+                    wait = 0;
+
+                    cekKursi(restaurantScene);
+                }
+            }
+        }
+
+        if (x < targetX) {
+            direction = "right";
+            x += speed;
+        } else if (x > targetX) {
+            direction = "left";
+            x -= speed;
+        }
+
+        else if (y < targetY) {
+            direction = "down";
+            y += speed;
+        } else if (y > targetY) {
+            direction = "up";
+            y -= speed;
+        }
+
+        spriteCounter++;
             if (spriteCounter > 12) {
                 if (spriteNum == 1) {
                     spriteNum = 2;
@@ -72,7 +95,6 @@ public class Player extends Entity {
                 }
                 spriteCounter = 0;
             }
-        }
     }
 
     public void draw(Graphics2D g2) {
@@ -116,6 +138,33 @@ public class Player extends Entity {
                 break;
         }
         g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
+        g2.setColor(Color.WHITE);
+        g2.drawString(pesanan, x, y - 10);
 
     }
+
+    public void setTarget(int x, int y) {
+        this.targetX = x;
+        this.targetY = y;
+    }
+
+    public boolean isAktif() {
+        return isAktif;
+    }
+
+    public void cekKursi(RestaurantScene kursi) {
+        if(x == kursi.resepsionisX && y == kursi.resepsionisY) {
+            for (RestaurantScene.Kursi k : kursi.daftarKursi) {
+            if (k.isKosong) {
+                setTarget(k.getX(), k.getY());
+                k.isKosong = false;
+                return;
+            }else {
+                // Jika semua kursi penuh, diberi logika lain (bisa langsung keluar atau tetap di tempat)
+                setTarget(x, y); // Tetap di tempat
+            }
+        }
+        }   
+    }
 }
+
