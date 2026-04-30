@@ -4,11 +4,16 @@ import java.util.Random;
 
 import org.ui.GamePanel;
 import org.ui.RestaurantScene;
+import org.model.Restoran;
 
 public class GameManager {
     private GamePanel gp;
     public RestaurantScene restaurantScene;
     private Random random = new Random();
+    private int[] jadwalBencana;
+    private int totalBencanaHariIni;
+    public Restoran restaurant = new Restoran();
+    public int kerugianHariIni = 0;
 
     // Data Progres Game
     public int hariKe = 1;
@@ -27,6 +32,7 @@ public class GameManager {
     // Dipanggil saat tombol "Buka Restoran" diklik
     public void mulaiFasePenjualan() {
         sedangBerjualan = true;
+        siapkanBencana();
 
         // loadlevel
         restaurantScene.loadLevel(levelRestoran);
@@ -61,6 +67,15 @@ public class GameManager {
         if (detikBerjalan >= 300) {
             akhirHari();
         }
+        
+        for (int i = 0; i < jadwalBencana.length; i++) {
+            if (jadwalBencana[i] == detikBerjalan) {
+
+                triggerBencana();
+
+                jadwalBencana[i] = -1; // biar gak ke-trigger lagi
+            }
+        }
     }
 
     public void akhirHari() {
@@ -68,4 +83,26 @@ public class GameManager {
         // Panggil fungsi rekap dan simpan data
         System.out.println("Hari berakhir. Menampilkan Rekap...");
     }
+    
+    public void triggerBencana() {
+
+        if (Math.random() < 0.5) {
+            gp.spawnTikus();
+        } else {
+            System.out.println("💨 Pembeli kabur!");
+        }
+    }
+    
+    public void siapkanBencana() {
+
+        totalBencanaHariIni = 1 + random.nextInt(2);
+
+        jadwalBencana = new int[totalBencanaHariIni];
+
+        for (int i = 0; i < totalBencanaHariIni; i++) {
+            // muncul antara detik 60 - 240 (biar gak awal/akhir banget)
+            jadwalBencana[i] = 60 + random.nextInt(180);
+        }
+    }
+    
 }

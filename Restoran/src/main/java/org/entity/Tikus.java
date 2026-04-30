@@ -1,28 +1,50 @@
 package org.entity;
 
+import java.awt.Graphics2D;
 
-import org.model.Restoran;
-
-abstract class Bencana {
-    public abstract void picuBencana(Restoran r);
-}
+import org.model.EfekTikusLapar;
+import org.ui.GamePanel;
+import org.model.Bencana;
+import java.awt.Color;
 
 public class Tikus extends Entity {
 
-    private Bencana bencana;
+    GamePanel gp;
+    private boolean sudahEfek = false;
+    private Bencana efek;
 
-    public void picuBencana(Restoran r) {
-        if (bencana != null) {
-            bencana.picuBencana(r);
+    public Tikus(GamePanel gp, Bencana efek) {
+        this.gp = gp;
+        this.efek = efek;
+
+        x = 0;
+        y = 400;
+        speed = 2;
+        direction = "right";
+        
+        System.out.println("Tikus dibuat di posisi: " + x + "," + y);
+    }
+
+    public void update() {
+
+        x += speed;
+
+        if (!sudahEfek && x > 300) {
+            efek.picuBencana(gp);
+            sudahEfek = true;
+        }
+
+        if (x > gp.screenWidth) {
+            gp.listTikus.remove(this);
         }
     }
 
-    public void setRencana(Bencana bencana) {
-        this.bencana = bencana;
-    }
-
-    public void updatePosisi() {
-        // contoh: jalan ke dapur
-        x += speed;
+//    public void draw(Graphics2D g2) {
+//        g2.drawString("🐀", x, y);
+//    }
+    
+    public void draw(Graphics2D g2) {
+        g2.setColor(Color.RED);
+        g2.fillRect(x, y, gp.tileSize, gp.tileSize);
     }
 }

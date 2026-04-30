@@ -11,6 +11,8 @@ import javax.swing.JPanel;
 import org.entity.NPC;
 import org.entity.Player;
 import org.main.GameManager;
+import org.entity.Tikus;
+import org.model.EfekTikusLapar;
 
 public class GamePanel extends JPanel implements Runnable {
     
@@ -20,15 +22,16 @@ public class GamePanel extends JPanel implements Runnable {
     public final int tileSize = originalTileSize * scale;
     final int maxScreenCol = 16;
     final int maxScreenRow = 12;
-    final int screenWidth = tileSize * maxScreenCol; // 768 pixels
+    public final int screenWidth = tileSize * maxScreenCol; // 768 pixels
     final int screenHeight = tileSize * maxScreenRow; // 576 pixels
+    public ArrayList<Tikus> listTikus = new ArrayList<>();
 
     KeyHandler keyHandler = new KeyHandler();
     Thread gameThread;
 
     // Entity & Manager
     Player player = new Player(this, keyHandler);
-    GameManager gm = new GameManager(this);
+    public GameManager gm = new GameManager(this);
     
     int detikBerjalan = 0; // Waktu dalam detik
     ArrayList<NPC> listNPC = new ArrayList<>();
@@ -82,7 +85,9 @@ public class GamePanel extends JPanel implements Runnable {
                     gm.updateWaktu(detikBerjalan);
                 }
                 timer = 0; // Reset timer setiap detik
+                
             }
+            
         }
     }
 
@@ -103,6 +108,17 @@ public class GamePanel extends JPanel implements Runnable {
             //     i--;
             // }
         }
+        
+        for (int i = 0; i < listTikus.size(); i++) {
+            Tikus t = listTikus.get(i);
+            t.update();
+
+            if (t.x > screenWidth) {
+                listTikus.remove(i);
+                i--;
+            }
+        }
+        
     }
 
     @Override
@@ -121,6 +137,10 @@ public class GamePanel extends JPanel implements Runnable {
         for (NPC npc : listNPC) {
             npc.draw(g2); // Meminta tiap NPC menggambar dirinya sendiri
         }
+        
+        for (Tikus t : listTikus) {
+            t.draw(g2);
+        }
 
         // Tampilkan Status Waktu di pojok layar
         g2.setColor(Color.WHITE);
@@ -129,5 +149,10 @@ public class GamePanel extends JPanel implements Runnable {
         if(!gm.sedangBerjualan) g2.drawString("TEKAN ENTER UNTUK BUKA", 300, 300);
         
         g2.dispose();
+        
+    }
+    
+    public void spawnTikus() {
+        listTikus.add(new Tikus(this, new EfekTikusLapar()));
     }
 }
