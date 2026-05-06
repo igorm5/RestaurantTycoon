@@ -8,6 +8,7 @@ import org.model.Bencana;
 import java.awt.Color;
 
 public class Tikus extends Entity {
+    //ini gjadi kepake
 
     GamePanel gp;
     private boolean sudahEfek = false;
@@ -34,9 +35,9 @@ public class Tikus extends Entity {
             sudahEfek = true;
         }
 
-        if (x > gp.screenWidth) {
-            gp.listTikus.remove(this);
-        }
+//        if (x > gp.screenWidth) {
+//            gp.listTikus.remove(this);
+//        }
     }
 
 //    public void draw(Graphics2D g2) {

@@ -12,6 +12,7 @@ package org.model;
 import org.ui.GamePanel;
 
 public class EfekTikusLapar extends Bencana {
+    //ini ga kepake masihan
 
     public EfekTikusLapar() {
         super("Tikus Lapar");

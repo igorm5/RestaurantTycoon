@@ -32,13 +32,12 @@ public class GameManager {
     // Dipanggil saat tombol "Buka Restoran" diklik
     public void mulaiFasePenjualan() {
         sedangBerjualan = true;
+
+        gp.detikBerjalan = 0; 
+
         siapkanBencana();
-
-        // loadlevel
         restaurantScene.loadLevel(levelRestoran);
-
         siapkanJadwalNPC();
-        gp.startGameThread(); // Pastikan loop di GamePanel jalan
     }
 
     private void siapkanJadwalNPC() {
@@ -86,8 +85,15 @@ public class GameManager {
     
     public void triggerBencana() {
 
-        if (Math.random() < 0.5) {
-            gp.spawnTikus();
+        if (Math.random() <= 1.0) {
+            gp.showTikusWarning();
+            gp.startShake(30);
+            
+            gp.gm.restaurant.kurangiStokRandom(2);
+            gp.gm.kerugianHariIni += 20;
+            
+            //nanti dipisah jadi class sendiri implements interface bencana
+            System.out.println("Tikus datanggggg");
         } else {
             System.out.println("💨 Pembeli kabur!");
         }
