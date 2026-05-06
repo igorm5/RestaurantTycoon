@@ -1,10 +1,10 @@
 package org.model;
 
-import org.entity.Pembeli;
+import org.entity.PembeliGaJadi;
 import java.util.Map;
 
 interface Jualable {
-    void jual(Pembeli pembeli);
+    void jual(PembeliGaJadi pembeli);
 }
 
 
@@ -28,7 +28,7 @@ public class Menu implements Jualable {
     }
 
     @Override
-    public void jual(org.entity.Pembeli pembeli) {
+    public void jual(org.entity.PembeliGaJadi pembeli) {
         System.out.println(nama + " dijual ke pembeli");
     }
 

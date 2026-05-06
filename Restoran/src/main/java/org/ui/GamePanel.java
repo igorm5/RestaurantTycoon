@@ -10,7 +10,7 @@ import java.awt.*;
 
 import javax.swing.JPanel;
 
-import org.entity.NPC;
+import org.entity.Pembeli;
 import org.entity.Player;
 import org.main.GameManager;
 import org.entity.Tikus;
@@ -45,7 +45,7 @@ public class GamePanel extends JPanel implements Runnable {
     public GameManager gm = new GameManager(this);
     
     public int detikBerjalan = 0; // Waktu dalam detik
-    ArrayList<NPC> listNPC = new ArrayList<>();
+    ArrayList<Pembeli> listNPC = new ArrayList<>();
     public Object restaurantScene;
 
     public GamePanel() {
@@ -61,7 +61,7 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     public void spawnNPC() {
-        listNPC.add(new NPC(this));
+        listNPC.add(new Pembeli(this));
         System.out.println("NPC Baru muncul!");
     }
 
@@ -167,7 +167,7 @@ public class GamePanel extends JPanel implements Runnable {
         player.draw(g2);
 
         // Gambar NPC
-        for (NPC npc : listNPC) {
+        for (Pembeli npc : listNPC) {
             npc.draw(g2); // Meminta tiap NPC menggambar dirinya sendiri
         }
         
