@@ -44,7 +44,12 @@ public class GamePanel extends JPanel implements Runnable {
     Player player = new Player(this, keyHandler);
     public GameManager gm = new GameManager(this);
     
+    public GameManager getGameManager() {
+        return gm;
+    }
+
     public int detikBerjalan = 0; // Waktu dalam detik
+    int pembeliHariIni = 0;
     ArrayList<Pembeli> listNPC = new ArrayList<>();
     public Object restaurantScene;
 
@@ -62,6 +67,7 @@ public class GamePanel extends JPanel implements Runnable {
 
     public void spawnNPC() {
         listNPC.add(new Pembeli(this));
+        pembeliHariIni++;
         System.out.println("NPC Baru muncul!");
     }
 
@@ -110,43 +116,19 @@ public class GamePanel extends JPanel implements Runnable {
             
             player.update();
 
-            if (keyHandler.enterPressed && !gm.sedangBerjualan) {
-                System.out.println("--- MEMULAI HARI BARU (TES) ---");
-                detikBerjalan = 0; // Reset waktu ke 0
-                gm.mulaiFasePenjualan(); // GameManager menghitung jadwal NPC
-            }
-            // Update semua NPC yang ada di list
-            for (int i = 0; i < listNPC.size(); i++) {
+        if (keyHandler.enterPressed && !gm.sedangBerjualan) {
+            System.out.println("--- MEMULAI HARI BARU (TES) ---");
+            detikBerjalan = 0; // Reset waktu ke 0
+            pembeliHariIni = 0; // Reset jumlah pembeli hari ini
+            gm.mulaiFasePenjualan(); // GameManager menghitung jadwal NPC
+        }
+        // Update semua NPC yang ada di list
+        for (int i = 0; i < listNPC.size(); i++) {
+            if(listNPC.get(i).isAktif()){
                 listNPC.get(i).update(gm.restaurantScene);
-
-                // if (!listNPC.get(i).isAktif()) {
-                //     listNPC.remove(i);
-                //     i--;
-                // }
-            }
-            
-        
-        
-//        for (int i = 0; i < listTikus.size(); i++) {
-//            Tikus t = listTikus.get(i);
-//            t.update();
-//
-//            if (t.x > screenWidth) {
-//                listTikus.remove(i);
-//                i--;
-//            }
-//        }
-        
-        if (isShaking) {
-            shakeOffsetX = (int)(Math.random() * 10 - 5); // -5 sampai 5
-            shakeOffsetY = (int)(Math.random() * 10 - 5);
-
-            shakeDuration--;
-
-            if (shakeDuration <= 0) {
-                isShaking = false;
-                shakeOffsetX = 0;
-                shakeOffsetY = 0;
+            }else{
+                listNPC.remove(i);
+                i--;
             }
         }
         
@@ -158,6 +140,11 @@ public class GamePanel extends JPanel implements Runnable {
         Graphics2D g2 = (Graphics2D) g;
         
         g2.translate(shakeOffsetX, shakeOffsetY);
+
+        // Gambar background level
+        if (gm != null && gm.restaurantScene != null) {
+            gm.restaurantScene.drawBackground(g2, screenWidth, screenHeight);
+        }
 
         // kasir (sementara)
         g2.setColor(Color.YELLOW);
@@ -179,6 +166,7 @@ public class GamePanel extends JPanel implements Runnable {
         g2.setColor(Color.WHITE);
         g2.drawString("Waktu: " + detikBerjalan + "s", 20, 50);
         g2.drawString("NPC di Layar: " + listNPC.size(), 20, 70);
+        g2.drawString("NPC Hari Ini: " + pembeliHariIni, 20, 90);
         if(!gm.sedangBerjualan) g2.drawString("TEKAN ENTER UNTUK BUKA", 300, 300);
         
         if (showTikusWarning && tikusWarningImage != null) {
