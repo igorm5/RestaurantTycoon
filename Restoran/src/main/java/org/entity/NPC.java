@@ -16,15 +16,15 @@ public class NPC extends Entity {
     private boolean isAktif;
     private String pesanan = "kopi";
     boolean sudahKeResepsionis = false;
-    boolean sedangMenunggu = false;
     private int wait = 0;
+    private boolean makan;
 
     public NPC(GamePanel gp) {
         this.gp = gp;
         this.isAktif = true;
 
         setDefaultValues();
-        getNPCImage();
+        getNPCImage(gp.getGameManager().levelRestoran); // Default level
     }
 
     public void setDefaultValues() {
@@ -34,7 +34,7 @@ public class NPC extends Entity {
         direction = "down";
     }
 
-    public void getNPCImage() {
+    public void getNPCImage(int level) {
         try {
             up1 = ImageIO.read(getClass().getResourceAsStream("/player/up1.png"));
             up2 = ImageIO.read(getClass().getResourceAsStream("/player/up2.png"));
@@ -44,6 +44,26 @@ public class NPC extends Entity {
             left2 = ImageIO.read(getClass().getResourceAsStream("/player/left2.png"));
             right1 = ImageIO.read(getClass().getResourceAsStream("/player/right1.png"));
             right2 = ImageIO.read(getClass().getResourceAsStream("/player/right2.png"));
+            
+            // logika duduk berdasarkan level (sementara hanya 2 level, bisa ditambah sampai 5)
+            switch (level) {
+            case 1:
+                makanImg = ImageIO.read(getClass().getResourceAsStream("/player/duduk/kayukanan.png"));
+                break;
+            case 2:
+                makanImg = ImageIO.read(getClass().getResourceAsStream("/player/duduk/kayukiri.png"));
+                break;
+            case 3:
+
+                break;
+            case 4:
+
+                break;
+            case 5:
+
+                break;
+            default:
+        }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -51,42 +71,33 @@ public class NPC extends Entity {
 
     public void update(RestaurantScene restaurantScene) {
 
-        if(!sudahKeResepsionis) {
-            setTarget(restaurantScene.resepsionisX, restaurantScene.resepsionisY);
+        // 1. Logika pergerakan
+        logikaGerak(restaurantScene);
 
-            if (x == targetX && y == targetY) {
-                sedangMenunggu = true; 
-            }
-
-            if(sedangMenunggu){
-                wait++;
-                if(wait > 180) { // Menunggu selama 3/*  */ detik (180 frames)
-                    sudahKeResepsionis = true;
-                    sedangMenunggu = false;
-                    wait = 0;
-
-                    cekKursi(restaurantScene);
-                }
-            }
-        }
+        // 2. Logika Pergerakan
+        boolean isMoving = false;
 
         if (x < targetX) {
             direction = "right";
             x += speed;
+            isMoving = true;
         } else if (x > targetX) {
             direction = "left";
             x -= speed;
-        }
-
-        else if (y < targetY) {
+            isMoving = true;
+        } else if (y < targetY) {
             direction = "down";
             y += speed;
+            isMoving = true;
         } else if (y > targetY) {
             direction = "up";
             y -= speed;
+            isMoving = true;
         }
 
-        spriteCounter++;
+        // 3. Animasi Sprite (Hanya berjalan jika isMoving true)
+        if (isMoving) {
+            spriteCounter++;
             if (spriteCounter > 12) {
                 if (spriteNum == 1) {
                     spriteNum = 2;
@@ -95,6 +106,10 @@ public class NPC extends Entity {
                 }
                 spriteCounter = 0;
             }
+        } else {
+            // Reset ke sprite default saat diam
+            spriteNum = 1; 
+        }
     }
 
     public void draw(Graphics2D g2) {
@@ -103,39 +118,43 @@ public class NPC extends Entity {
 
         BufferedImage image = null;
 
-        switch (direction) {
-            case "up":
-                if(spriteNum == 1){
-                    image = up1;
-                }
-                if(spriteNum == 2){
-                    image = up2;
-                }
-                break;
-            case "down":
-                if(spriteNum == 1){
-                    image = down1;
-                }
-                if(spriteNum == 2){
-                    image = down2;
-                }
-                break;
-            case "left":
-                if(spriteNum == 1){
-                    image = left1;
-                }
-                if(spriteNum == 2){
-                    image = left2;
-                }
-                break;
-            case "right":
-                if(spriteNum == 1){
-                    image = right1;
-                }
-                if(spriteNum == 2){
-                    image = right2;
-                }
-                break;
+        if(!makan){
+            switch (direction) {
+                case "up":
+                    if(spriteNum == 1){
+                        image = up1;
+                    }
+                    if(spriteNum == 2){
+                        image = up2;
+                    }
+                    break;
+                case "down":
+                    if(spriteNum == 1){
+                        image = down1;
+                    }
+                    if(spriteNum == 2){
+                        image = down2;
+                    }
+                    break;
+                case "left":
+                    if(spriteNum == 1){
+                        image = left1;
+                    }
+                    if(spriteNum == 2){
+                        image = left2;
+                    }
+                    break;
+                case "right":
+                    if(spriteNum == 1){
+                        image = right1;
+                    }
+                    if(spriteNum == 2){
+                        image = right2;
+                    }
+                    break;
+            }
+        } else {
+            image = makanImg; 
         }
         g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
         g2.setColor(Color.WHITE);
@@ -152,7 +171,7 @@ public class NPC extends Entity {
         return isAktif;
     }
 
-    public void cekKursi(RestaurantScene kursi) {
+    public void keKursi(RestaurantScene kursi) {
         if(x == kursi.resepsionisX && y == kursi.resepsionisY) {
             for (RestaurantScene.Kursi k : kursi.daftarKursi) {
             if (k.isKosong) {
@@ -165,6 +184,61 @@ public class NPC extends Entity {
             }
         }
         }   
+    }
+
+    private boolean makanSelesai = false;
+    public void logikaGerak(RestaurantScene logika) {
+
+        // 1. Tentukan Target Berdasarkan Status
+        if (!sudahKeResepsionis) {
+            setTarget(logika.resepsionisX, logika.resepsionisY);
+        } else if (!makanSelesai) { 
+            // Selama belum selesai makan, tetap menuju/di kursi
+            keKursi(logika); 
+        } else {
+            // Jika sudah ke resepsionis DAN sudah selesai makan
+            keluar(logika); 
+        }
+
+        // 2. Logika Aksi Saat Sampai di Target
+        if (x == targetX && y == targetY) {
+            wait++;
+            
+            // AKSI DI RESEPSIONIS
+            if (!sudahKeResepsionis) {
+                direction = "up";
+                if (wait > 180) { 
+                    sudahKeResepsionis = true;
+                    wait = 0; 
+                }
+            } 
+            // AKSI SAAT MAKAN (Sudah di kursi)
+            else if (!makanSelesai) {
+                makan = true; // Ganti sprite ke makan
+                if (wait > 600) { // Durasi makan selesai
+                    makanSelesai = true;
+                    makan = false; // Kembalikan sprite ke normal
+                    // Bebaskan kursi
+                    for (RestaurantScene.Kursi k : logika.daftarKursi) {
+                        if (x == k.getX() && y == k.getY()) {
+                            k.isKosong = true;
+                            break; 
+                        }
+                    }
+                    wait = 0; // Reset wait untuk perjalanan keluar
+                }
+            }
+        } else {
+            // Reset wait jika masih dalam perjalanan (belum sampai target)
+            wait = 0; 
+        }
+    }
+
+    public void keluar(RestaurantScene pintuKeluar) {
+        setTarget(pintuKeluar.getPintuX(), pintuKeluar.getPintuY());
+        if(x == targetX && y == targetY) {
+            isAktif = false; // NPC tidak aktif lagi setelah keluar
+        }
     }
 }
 
